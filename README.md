@@ -1,5 +1,8 @@
 # Stow
 
+![Linux](https://img.shields.io/badge/-Linux-FCC624?style=flat-square&logo=linux&logoColor=black)
+![Python](https://img.shields.io/badge/-Python-3776AB?style=flat-square&logo=python&logoColor=white)
+
 This script mimics the functionality of GNU Stow, allowing you to create symlinks to files and directories in a specified path.
 
 ## Why did I create `stow`?
