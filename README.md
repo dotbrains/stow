@@ -91,3 +91,29 @@ stow -p /path/to/directory
 [!] Would create symlink: /home/user/file2 -> /path/to/source/file2
 [!] Would create symlink: /home/user/file3 -> /path/to/source/file3
 ```
+
+## Tests
+
+To run the tests, execute the following command:
+
+```bash
+python3 test_stow.py
+```
+
+### Running the tests within Git Bash on Windows in PyCharm
+
+To run the tests within Git Bash on Windows in PyCharm, you need to set the `SHELL` environment variable to `bash.exe`:
+
+1. Open the `Run/Debug Configurations` dialog.
+2. Select the `stow` configuration.
+3. Add the following environment variable:
+   * Name: `SHELL`
+   * Value: `bash.exe`
+   * Description: `Path to the shell executable`
+4. Click `OK` to save the configuration.
+5. Run the tests.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](/LICENSE) file for details.
+

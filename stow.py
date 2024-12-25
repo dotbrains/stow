@@ -108,7 +108,7 @@ def main():
         sys.exit(1)
 
     ignore_file = os.path.join(source_path, '.stow-local-ignore')
-    ignore_list = parse_ignore_file(ignore_file)
+    ignore_list = parse_ignore_file(ignore_file) + ['.stow-local-ignore']
     files_to_stow = get_files_to_stow(source_path, ignore_list)
 
     log_info(f"Using path: {source_path}")
