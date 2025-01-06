@@ -37,7 +37,7 @@ class TestStow(unittest.TestCase):
     def test_get_files_to_stow(self):
         ignore_list = parse_ignore_file(self.ignore_file) + ['.stow-local-ignore']
         files_to_stow = get_files_to_stow(self.temp_dir, ignore_list)
-        self.assertEqual(len(files_to_stow), 3)
+        self.assertEqual(len(files_to_stow), 4)
         self.assertIn(self.file1, [file_path for file_path, _ in files_to_stow])
         self.assertIn(self.file2, [file_path for file_path, _ in files_to_stow])
 
