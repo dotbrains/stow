@@ -1,4 +1,4 @@
-# Stow
+# Stow [![Python application](https://github.com/dotbrains/stow/actions/workflows/python-app.yml/badge.svg)](https://github.com/dotbrains/stow/actions/workflows/python-app.yml)
 
 ![Linux](https://img.shields.io/badge/-Linux-FCC624?style=flat-square&logo=linux&logoColor=black)
 ![Python](https://img.shields.io/badge/-Python-3776AB?style=flat-square&logo=python&logoColor=white)
