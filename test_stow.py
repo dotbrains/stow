@@ -35,19 +35,25 @@ class TestStow(unittest.TestCase):
         self.assertEqual(ignore_list, ['.git'])
 
     def test_get_files_to_stow(self):
-        ignore_list = parse_ignore_file(self.ignore_file) + ['.stow-local-ignore']
+        ignore_list = parse_ignore_file(self.ignore_file)
         files_to_stow = get_files_to_stow(self.temp_dir, ignore_list)
-        self.assertEqual(len(files_to_stow), 3)
+        self.assertEqual(len(files_to_stow), 4)
         self.assertIn(self.file1, [file_path for file_path, _ in files_to_stow])
         self.assertIn(self.file2, [file_path for file_path, _ in files_to_stow])
 
     def test_stow_files(self):
-        ignore_list = parse_ignore_file(self.ignore_file) + ['.stow-local-ignore']
+        ignore_list = parse_ignore_file(self.ignore_file)
         files_to_stow = get_files_to_stow(self.temp_dir, ignore_list)
         target_dir = tempfile.mkdtemp()
         stow_files(target_dir, False, files_to_stow)
-        self.assertTrue(os.path.islink(os.path.join(target_dir, 'file1.txt')))
-        self.assertTrue(os.path.islink(os.path.join(target_dir, 'dir1', 'file2.txt')))
+        # Check that the files exist in the target directory (could be symlink, hardlink, or copy)
+        self.assertTrue(os.path.exists(os.path.join(target_dir, 'file1.txt')))
+        self.assertTrue(os.path.exists(os.path.join(target_dir, 'dir1', 'file2.txt')))
+        # Verify the content is correct
+        with open(os.path.join(target_dir, 'file1.txt'), 'r') as f:
+            self.assertEqual(f.read(), 'Hello, World!')
+        with open(os.path.join(target_dir, 'dir1', 'file2.txt'), 'r') as f:
+            self.assertEqual(f.read(), 'Hello, World!')
         shutil.rmtree(target_dir)
 
     def test_stow_files_dry_run(self):

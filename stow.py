@@ -3,6 +3,8 @@
 import os
 import argparse
 import sys
+import platform
+import shutil
 
 # ANSI color codes with reset properly defined
 class TerminalColors:
@@ -73,8 +75,46 @@ def get_files_to_stow(path, ignore_list):
 
     return files_to_stow
 
+def create_link(source, target):
+    """Create a link (symlink on Unix, hard link or copy on Windows if symlink fails)."""
+    try:
+        # Try to create a symbolic link first
+        os.symlink(source, target)
+        return "symlink"
+    except OSError as e:
+        if platform.system() == "Windows" and "privilege" in str(e).lower():
+            # On Windows, if symlink fails due to privileges, try hard link for files
+            try:
+                if os.path.isfile(source):
+                    os.link(source, target)
+                    return "hardlink"
+                else:
+                    # For directories, we'll need to copy
+                    if os.path.exists(target):
+                        if os.path.isdir(target):
+                            shutil.rmtree(target)
+                        else:
+                            os.remove(target)
+                    shutil.copytree(source, target)
+                    return "copy"
+            except OSError:
+                # If hard link also fails, fall back to copying
+                if os.path.isfile(source):
+                    shutil.copy2(source, target)
+                    return "copy"
+                else:
+                    if os.path.exists(target):
+                        if os.path.isdir(target):
+                            shutil.rmtree(target)
+                        else:
+                            os.remove(target)
+                    shutil.copytree(source, target)
+                    return "copy"
+        else:
+            raise e
+
 def stow_files(target_dir, dry_run, files_to_stow):
-    """Create symlinks for files and directories to the target directory."""
+    """Create links for files and directories to the target directory."""
     for file_path, relative_path in files_to_stow:
         target_path = os.path.join(target_dir, relative_path)
 
@@ -85,11 +125,15 @@ def stow_files(target_dir, dry_run, files_to_stow):
         try:
             os.makedirs(os.path.dirname(target_path), exist_ok=True)
             if os.path.exists(target_path) or os.path.islink(target_path):
-                os.remove(target_path)
-            os.symlink(file_path, target_path)
-            log_success(f"Created symlink: {target_path} -> {file_path}")
+                if os.path.isdir(target_path) and not os.path.islink(target_path):
+                    shutil.rmtree(target_path)
+                else:
+                    os.remove(target_path)
+            
+            link_type = create_link(file_path, target_path)
+            log_success(f"Created {link_type}: {target_path} -> {file_path}")
         except OSError as e:
-            log_error(f"Error creating symlink for {file_path}: {e}")
+            log_error(f"Error creating link for {file_path}: {e}")
 
 def main():
     parser = argparse.ArgumentParser(
@@ -108,7 +152,7 @@ def main():
         sys.exit(1)
 
     ignore_file = os.path.join(source_path, '.stow-local-ignore')
-    ignore_list = parse_ignore_file(ignore_file) + ['.stow-local-ignore']
+    ignore_list = parse_ignore_file(ignore_file)
     files_to_stow = get_files_to_stow(source_path, ignore_list)
 
     log_info(f"Using path: {source_path}")
