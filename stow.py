@@ -56,22 +56,23 @@ def parse_ignore_file(ignore_file):
         return []
 
 def get_files_to_stow(path, ignore_list):
-    """Get all files and directories to be stowed, excluding ignored paths."""
+    """Get all files and directories to be stowed, excluding ignored paths.
+    
+    Only includes files that are directly in the source directory,
+    or directories that should be symlinked entirely.
+    """
     files_to_stow = []
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            file_path = os.path.join(root, file)
-            relative_path = os.path.relpath(file_path, path)
-            if any(relative_path.startswith(ignore) for ignore in ignore_list):
-                continue
-            files_to_stow.append((file_path, relative_path))
-
-        for dir in dirs:
-            dir_path = os.path.join(root, dir)
-            relative_path = os.path.relpath(dir_path, path)
-            if any(relative_path.startswith(ignore) for ignore in ignore_list):
-                continue
-            files_to_stow.append((dir_path, relative_path))
+    
+    # Get items directly in the source directory
+    for item in os.listdir(path):
+        item_path = os.path.join(path, item)
+        relative_path = item
+        
+        # Skip ignored items
+        if any(relative_path.startswith(ignore) for ignore in ignore_list):
+            continue
+            
+        files_to_stow.append((item_path, relative_path))
 
     return files_to_stow
 
